@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block title %}Upload Zip File - CHR File Processor{% endblock %}
+
+{% block content %}
+    <h1>CHR File Processor</h1>
+    
+    <form method="post" enctype="multipart/form-data">
+        <div class="form-group">
+            <label for="file">Select a zip file containing .chr files:</label>
+            <input type="file" id="file" name="file" accept=".zip" required>
+        </div>
+        
+        <div class="form-group">
+            <input type="submit" value="Upload and Process">
+        </div>
+    </form>
+    
+    <div style="margin-top: 30px; padding: 15px; background-color: #e9ecef; border-radius: 4px;">
+        <h3>Instructions:</h3>
+        <ul>
+            <li>Upload a zip file containing one or more .chr files</li>
+            <li>The first .chr file found will be processed</li>
+            <li>The processed content will be displayed as lines of text</li>
+            <li>Maximum file size: 16MB</li>
+        </ul>
+    </div>
+{% endblock %}
