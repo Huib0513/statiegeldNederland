@@ -6,8 +6,10 @@ from werkzeug.utils import secure_filename
 from werkzeug.datastructures import FileStorage
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = '10e41f90aee93e80ad364d942f54483f0af3d5d8be1c2a771c88186cbf72cdd6'
-app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
+app.config.from_pyfile('flaskconfig.py')
+#app.config['SECRET_KEY'] = '10e41f90aee93e80ad364d942f54483f0af3d5d8be1c2a771c88186cbf72cdd6'
+#d740fae4a2f67d0d62aaa7d209b01aa7750b8678b3ab58793024365d00c96eb4
+#app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
 
 # Ensure upload folder exists
 UPLOAD_FOLDER = 'uploads'

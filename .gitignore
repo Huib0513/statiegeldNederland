@@ -211,3 +211,5 @@ __marimo__/
 # Credentials for Google cloud
 servicecredentials.json
 
+# Flask configuration, including secret key
+flaskconfig.py
