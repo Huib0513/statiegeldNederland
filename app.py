@@ -2,14 +2,12 @@ from flask import Flask, request, render_template, flash, redirect, url_for
 import os
 import zipfile
 import tempfile
+from collections import defaultdict
 from werkzeug.utils import secure_filename
 from werkzeug.datastructures import FileStorage
 
 app = Flask(__name__)
 app.config.from_pyfile('flaskconfig.py')
-#app.config['SECRET_KEY'] = '10e41f90aee93e80ad364d942f54483f0af3d5d8be1c2a771c88186cbf72cdd6'
-#d740fae4a2f67d0d62aaa7d209b01aa7750b8678b3ab58793024365d00c96eb4
-#app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
 
 # Ensure upload folder exists
 UPLOAD_FOLDER = 'uploads'
@@ -19,28 +17,28 @@ if not os.path.exists(UPLOAD_FOLDER):
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 def process_chr_file(file_path):
-    """
-    Process a .chr file and return the result as lines of text.
-    Modify this function according to your specific processing needs.
-    """
     try:
         with open(file_path, 'r', encoding='utf-8') as file:
             content = file.read()
             
         # Processing: split into lines
         lines = content.split('\n')
-        processed_lines = []
-        processed_bags = set()
         processing_date = lines[0].split(';')[7]
-        moneys = []
+
+        processed_lines = 0
+        bags = defaultdict(float)
+        moneys = 0.0
         
-        for i, line in enumerate(lines, 1):
+        for line in lines:
             if line.strip():  # Skip empty lines
-                processed_lines.append(f"Line {i}: {line}")
-                processed_bags.add(line.split(';')[5])
-                moneys.append(line.split(';')[9])
+                processed_lines += 1
+                values = line.split(';')
+                if values[8][1:] != '50':
+                    bags[values[5]] += float(values[10].replace(',','.'))
+                    moneys += float(values[10].replace(',','.'))
         
-        return len(processed_lines), processed_bags, moneys, processing_date
+        processed_bags = [{'id': x, 'amount':bags[x]} for x in bags.keys()]
+        return processed_lines, processed_bags, moneys, processing_date
         
     except UnicodeDecodeError:
         # Try binary mode if UTF-8 fails

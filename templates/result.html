@@ -23,16 +23,14 @@
         <p><b>Bags</b></p>
         {% if bags %}
             {% for bag in bags %}
-                <div class="result-line">{{ bag }}</div>
+                <div class="result-line">{{ bag.id }} : {{ bag.amount }}</div>
             {% endfor %}
         {% else %}
             <p>No bags to empty.</p>
         {% endif %}
         <p><b>Ca$h</b></p>
         {% if moneys %}
-            {% for m in moneys %}
-                <div class="result-line">{{ m }}</div>
-            {% endfor %}
+            <div class="result-line">{{ moneys }}</div>
         {% else %}
             <p>Broke :(</p>
         {% endif %}
