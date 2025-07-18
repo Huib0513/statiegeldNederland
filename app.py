@@ -27,15 +27,20 @@ def process_chr_file(file_path):
         with open(file_path, 'r', encoding='utf-8') as file:
             content = file.read()
             
-        # Example processing: split into lines and add line numbers
+        # Processing: split into lines
         lines = content.split('\n')
         processed_lines = []
+        processed_bags = set()
+        processing_date = lines[0].split(';')[7]
+        moneys = []
         
         for i, line in enumerate(lines, 1):
             if line.strip():  # Skip empty lines
                 processed_lines.append(f"Line {i}: {line}")
+                processed_bags.add(line.split(';')[5])
+                moneys.append(line.split(';')[9])
         
-        return processed_lines
+        return len(processed_lines), processed_bags, moneys, processing_date
         
     except UnicodeDecodeError:
         # Try binary mode if UTF-8 fails
@@ -53,9 +58,11 @@ def process_chr_file(file_path):
             return hex_lines
             
         except Exception as e:
+            print(f"Error processing file: {str(e)}")
             return [f"Error processing file: {str(e)}"]
     
     except Exception as e:
+        print(f"Error processing file: {str(e)}")
         return [f"Error processing file: {str(e)}"]
 
 def allowed_file(filename):
@@ -99,13 +106,16 @@ def upload_file():
                     
                     # Process the first .chr file found
                     chr_file_path = chr_files[0]
-                    processed_lines = process_chr_file(chr_file_path)
+                    processed_lines, processed_bags, moneys, process_date = process_chr_file(chr_file_path)
                     
                     # Clean up the uploaded file
                     os.remove(file_path)
                     
                     return render_template('result.html', 
                                          lines=processed_lines,
+                                         bags=processed_bags,
+                                         moneys=moneys,
+                                         datum=process_date,
                                          filename=os.path.basename(chr_file_path))
             
             except zipfile.BadZipFile:

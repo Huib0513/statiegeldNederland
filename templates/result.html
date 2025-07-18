@@ -8,12 +8,33 @@
     <h2>File: {{ filename }}</h2>
     
     <div class="result-container">
+        <p><b>Verwerkingsdatum</b></p>
+        {% if datum %}
+            <div class="result-line">{{ datum }}</div>
+        {% else %}
+            <p>1-1-1900 ;)</p>
+        {% endif %}
+        <p><b>Aantal regels</b></p>
         {% if lines %}
-            {% for line in lines %}
-                <div class="result-line">{{ line }}</div>
-            {% endfor %}
+            <div class="result-line">{{ lines }}</div>
         {% else %}
             <p>No content to display.</p>
+        {% endif %}
+        <p><b>Bags</b></p>
+        {% if bags %}
+            {% for bag in bags %}
+                <div class="result-line">{{ bag }}</div>
+            {% endfor %}
+        {% else %}
+            <p>No bags to empty.</p>
+        {% endif %}
+        <p><b>Ca$h</b></p>
+        {% if moneys %}
+            {% for m in moneys %}
+                <div class="result-line">{{ m }}</div>
+            {% endfor %}
+        {% else %}
+            <p>Broke :(</p>
         {% endif %}
     </div>
     

@@ -53,18 +53,48 @@ def main():
       print("No data found.")
       return
 
-    r = 0
-    for row in values:
-      print(str(r) + ': ', end='')
+    #print('Found data in range: ' + result.get('range', 'Geen'))
+    #r = 0
+    for r, row in enumerate(values):
+      print(str(r+1) + ': ', end='')
       print(row)
       if (row[0] == '59322291'): 
-        found_row = r + 1
-        row.append('Y')
-        print(row)
-      r += 1
+        found_row = r
   except HttpError as err:
     print(err)
 
+  try:
+    # Write additional row, just to figure out how to
+    writevalues = [
+      [
+        'X', '29-2-2024', -10
+      ]
+      # Additional rows ...
+    ]
+
+    print('Writing values: ', end='')
+    print(writevalues)
+
+    WRITE_RANGE_NAME = 'E' + str(found_row) + ':' + 'G' + str(found_row)
+    print('Write to range: ' + WRITE_RANGE_NAME)
+
+    body = {"values": writevalues}
+    result = (
+      service.spreadsheets()
+      .values()
+      .update(
+          spreadsheetId=SPREADSHEET_ID,
+          range=WRITE_RANGE_NAME,
+          valueInputOption='USER_ENTERED',
+          body=body,
+      )
+      .execute()
+    )
+    print(f"{result.get('updatedCells')} cells updated.")
+    return result
+  except HttpError as error:
+    print(f"An error occurred: {error}")
+    return error
 
 if __name__ == "__main__":
   main()
