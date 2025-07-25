@@ -5,6 +5,7 @@ import tempfile
 from collections import defaultdict
 from werkzeug.utils import secure_filename
 from werkzeug.datastructures import FileStorage
+from sheetsmanager import update_sheet_by_search, insert_row_by_name, SheetsManager
 
 app = Flask(__name__)
 app.config.from_pyfile('flaskconfig.py')
@@ -15,6 +16,25 @@ if not os.path.exists(UPLOAD_FOLDER):
     os.makedirs(UPLOAD_FOLDER)
 
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
+def update_sheet(processing_date: str, bags: dict)->str:
+    spreadsheet_id='1DJmUp6qd7gZxrlHdUcjwTA1pnDFES7iYq_GfAoyNkHE'
+    sheet_name='Blad1'
+
+    sheets = SheetsManager('servicecredentials.json')
+    for bag in bags:
+        columns = sheets.get_column_names(spreadsheet_id, sheet_name)
+        row_num = sheets.find_row_by_value(spreadsheet_id, sheet_name, bag['id'], columns['Zaknummer'])
+        if row_num != None:
+            sheets.write_to_sheet(spreadsheet_id, f'E{row_num}:G{row_num}', [['X', processing_date, bag['amount']]])
+        else:
+            # Find row number with first value higher than bag['id'] in variable 'position'
+            # Insert row with correct values on that row number
+            #result = insert_row_by_name(
+                #spreadsheet_id, sheet_name, 
+                #row_number=position, 
+                #values=[[bag['id'],'', '', '', 'X', processing_date, bag['amount']]])
+    return ''
 
 def process_chr_file(file_path):
     try:
@@ -40,25 +60,6 @@ def process_chr_file(file_path):
         processed_bags = [{'id': x, 'amount':bags[x]} for x in bags.keys()]
         return processed_lines, processed_bags, moneys, processing_date
         
-    except UnicodeDecodeError:
-        # Try binary mode if UTF-8 fails
-        try:
-            with open(file_path, 'rb') as file:
-                content = file.read()
-            
-            # Convert binary content to hex representation
-            hex_lines = []
-            for i in range(0, len(content), 16):
-                chunk = content[i:i+16]
-                hex_str = ' '.join(f'{b:02x}' for b in chunk)
-                hex_lines.append(f"Offset {i:04x}: {hex_str}")
-            
-            return hex_lines
-            
-        except Exception as e:
-            print(f"Error processing file: {str(e)}")
-            return [f"Error processing file: {str(e)}"]
-    
     except Exception as e:
         print(f"Error processing file: {str(e)}")
         return [f"Error processing file: {str(e)}"]
@@ -109,12 +110,14 @@ def upload_file():
                     # Clean up the uploaded file
                     os.remove(file_path)
                     
+                    sheet_status = update_sheet(process_date, processed_bags)
                     return render_template('result.html', 
                                          lines=processed_lines,
                                          bags=processed_bags,
                                          moneys=moneys,
                                          datum=process_date,
-                                         filename=os.path.basename(chr_file_path))
+                                         filename=os.path.basename(chr_file_path),
+                                         sheetstate=sheet_status)
             
             except zipfile.BadZipFile:
                 flash('Invalid zip file')

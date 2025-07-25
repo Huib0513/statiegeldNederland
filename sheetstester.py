@@ -32,9 +32,6 @@ RANGE_NAME = 'Blad1'
 
 
 def main():
-  """Shows basic usage of the Sheets API.
-  Prints values from a sample spreadsheet.
-  """
   creds = service_account.Credentials.from_service_account_file(SERVICE_ACCOUNT_FILE, scopes=SCOPES)
 
   try:
