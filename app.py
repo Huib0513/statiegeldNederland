@@ -17,24 +17,109 @@ if not os.path.exists(UPLOAD_FOLDER):
 
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
-def update_sheet(processing_date: str, bags: dict)->str:
-    spreadsheet_id='1DJmUp6qd7gZxrlHdUcjwTA1pnDFES7iYq_GfAoyNkHE'
-    sheet_name='Blad1'
-
-    sheets = SheetsManager('servicecredentials.json')
-    for bag in bags:
+def update_sheet(processing_date: str, bags: dict) -> str:
+    spreadsheet_id = '1DJmUp6qd7gZxrlHdUcjwTA1pnDFES7iYq_GfAoyNkHE'
+    sheet_name = 'Blad1'
+    
+    try:
+        sheets = SheetsManager('servicecredentials.json')
         columns = sheets.get_column_names(spreadsheet_id, sheet_name)
-        row_num = sheets.find_row_by_value(spreadsheet_id, sheet_name, bag['id'], columns['Zaknummer'])
-        if row_num != None:
-            sheets.write_to_sheet(spreadsheet_id, f'E{row_num}:G{row_num}', [['X', processing_date, bag['amount']]])
-        else:
-            # Find row number with first value higher than bag['id'] in variable 'position'
-            # Insert row with correct values on that row number
-            #result = insert_row_by_name(
-                #spreadsheet_id, sheet_name, 
-                #row_number=position, 
-                #values=[[bag['id'],'', '', '', 'X', processing_date, bag['amount']]])
-    return ''
+        
+        # Validate required columns exist
+        required_columns = ['Zaknummer', 'Verwerkt', 'Verwerkingsdatum', 'Bedrag']
+        missing_columns = [col for col in required_columns if col not in columns]
+        if missing_columns:
+            return f"Error: Missing required columns in sheet: {', '.join(missing_columns)}"
+        
+        # Get column index for Zaknummer to use in searches
+        zaknummer_col_index = ord(columns['Zaknummer']) - ord('A')
+        
+        for bag in bags:
+            try:
+                # Find existing row with this bag ID
+                row_num = sheets.find_row_by_value(
+                    spreadsheet_id, 
+                    sheet_name, 
+                    bag['id'], 
+                    zaknummer_col_index
+                )
+                
+                if row_num is not None:
+                    # Update existing row
+                    sheets.write_to_sheet(
+                        spreadsheet_id, 
+                        f'E{row_num}:G{row_num}', 
+                        [['X', processing_date, bag['amount']]]
+                    )
+                else:
+                    # Find position where to insert new row
+                    position = find_insert_position(sheets, spreadsheet_id, sheet_name, 
+                                                  bag['id'], zaknummer_col_index)
+                    
+                    # Insert new row with correct values
+                    insert_row_by_name(
+                        spreadsheet_id, 
+                        sheet_name, 
+                        row_number=position, 
+                        values=[[bag['id'], '', '', '', 'X', processing_date, bag['amount']]]
+                    )
+                    
+            except Exception as e:
+                return f"Error processing bag {bag['id']}: {str(e)}"
+        
+        return f"Successfully processed {len(bags)} bags"
+        
+    except Exception as e:
+        return f"Error accessing sheet: {str(e)}"
+
+
+def find_insert_position(sheets: SheetsManager, spreadsheet_id: str, sheet_name: str, 
+                        target_id: str, zaknummer_col_index: int) -> int:
+    """
+    Find the position where to insert a new row based on bag ID.
+    Returns the row number where the new row should be inserted.
+    
+    Args:
+        sheets: SheetsManager instance
+        spreadsheet_id: The spreadsheet ID
+        sheet_name: The sheet name
+        target_id: The bag ID to insert
+        zaknummer_col_index: Column index for Zaknummer column
+    
+    Returns:
+        int: Row number where to insert (1-based)
+    """
+    try:
+        # Read all data from the sheet
+        all_data = sheets.read_sheet(spreadsheet_id, sheet_name)
+        
+        # Skip header row and find insertion position
+        for row_idx, row in enumerate(all_data[1:], start=2):  # Start from row 2 (skip header)
+            if len(row) > zaknummer_col_index and row[zaknummer_col_index]:
+                try:
+                    # Convert both to integers for proper numeric comparison
+                    current_id = int(row[zaknummer_col_index])
+                    target_id_int = int(target_id)
+                    
+                    if current_id > target_id_int:
+                        return row_idx  # Insert before this row
+                        
+                except (ValueError, TypeError):
+                    # If conversion fails, do string comparison
+                    if row[zaknummer_col_index] > target_id:
+                        return row_idx
+        
+        # If no higher value found, insert at the end
+        return len(all_data) + 1
+        
+    except Exception as e:
+        # If there's an error, default to inserting at the end
+        print(f"Warning: Error finding insert position, inserting at end: {str(e)}")
+        try:
+            all_data = sheets.read_sheet(spreadsheet_id, sheet_name)
+            return len(all_data) + 1
+        except:
+            return 2  # Default to row 2 if everything fails
 
 def process_chr_file(file_path):
     try:

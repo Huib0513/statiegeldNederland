@@ -296,9 +296,9 @@ def insert_row_by_name(spreadsheet_id: str, sheet_name: str, row_number: int,
     # Insert the row
     result = sheets_manager.insert_row(spreadsheet_id, sheet_id, row_number, values)
     
-    print(f"Inserted new row at position {row_number} in sheet '{sheet_name}'")
-    if values:
-        print(f"Populated with values: {values}")
+    #print(f"Inserted new row at position {row_number} in sheet '{sheet_name}'")
+    #if values:
+    #    print(f"Populated with values: {values}")
     
     return result
 
@@ -342,9 +342,9 @@ def update_sheet_by_search(spreadsheet_id: str, sheet_name: str, search_value: s
     # Write the values
     result = sheets_manager.write_to_sheet(spreadsheet_id, write_range, write_values)
     
-    print(f"Found '{search_value}' in row {found_row}")
-    print(f"Updated range: {write_range}")
-    print(f"{result.get('updatedCells')} cells updated.")
+    #print(f"Found '{search_value}' in row {found_row}")
+    #print(f"Updated range: {write_range}")
+    #print(f"{result.get('updatedCells')} cells updated.")
     
     return result
 
