@@ -74,7 +74,7 @@ def update_sheet(processing_date: str, bags: dict) -> str:
 
 
 def find_insert_position(sheets: SheetsManager, spreadsheet_id: str, sheet_name: str, 
-                        target_id: str, zaknummer_col_index: int) -> int:
+                        target_id: str, col_index: int) -> int:
     """
     Find the position where to insert a new row based on bag ID.
     Returns the row number where the new row should be inserted.
@@ -84,7 +84,7 @@ def find_insert_position(sheets: SheetsManager, spreadsheet_id: str, sheet_name:
         spreadsheet_id: The spreadsheet ID
         sheet_name: The sheet name
         target_id: The bag ID to insert
-        zaknummer_col_index: Column index for Zaknummer column
+        col_index: Column index for Zaknummer column
     
     Returns:
         int: Row number where to insert (1-based)
@@ -95,10 +95,10 @@ def find_insert_position(sheets: SheetsManager, spreadsheet_id: str, sheet_name:
         
         # Skip header row and find insertion position
         for row_idx, row in enumerate(all_data[1:], start=2):  # Start from row 2 (skip header)
-            if len(row) > zaknummer_col_index and row[zaknummer_col_index]:
+            if len(row) > col_index and row[col_index]:
                 try:
                     # Convert both to integers for proper numeric comparison
-                    current_id = int(row[zaknummer_col_index])
+                    current_id = int(row[col_index])
                     target_id_int = int(target_id)
                     
                     if current_id > target_id_int:
@@ -106,7 +106,7 @@ def find_insert_position(sheets: SheetsManager, spreadsheet_id: str, sheet_name:
                         
                 except (ValueError, TypeError):
                     # If conversion fails, do string comparison
-                    if row[zaknummer_col_index] > target_id:
+                    if row[col_index] > target_id:
                         return row_idx
         
         # If no higher value found, insert at the end
