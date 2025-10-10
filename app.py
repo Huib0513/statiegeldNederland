@@ -221,5 +221,55 @@ def upload_file():
     
     return render_template('upload.html')
 
+# add route for GET on http://192.168.143.32:5005/register?code=1991571059344484 to register a new bag
+# it should display a web page requesting additional data: source (default Polaris, Ausnutria, Robert, free text), type (mini, small) en afgiftedatum (default: today)
+#@app.route('/register', methods=['GET'])
+#def register():
+#    # Get the code from query parameters
+#    code = request.args.get('code', '')
+#    
+#    # Get today's date in ISO format for the date input default
+#    today = datetime.now().strftime('%Y-%m-%d')
+#    
+#    return render_template('register.html', code=code, today=today)
+
+#@app.route('/submit-registration', methods=['POST'])
+#def submit_registration():
+#    # Get form data
+#    code = request.form.get('code')
+#    source = request.form.get('source')
+#    custom_source = request.form.get('customSource')
+#    type_value = request.form.get('type')
+#    afgiftedatum = request.form.get('afgiftedatum')
+#    
+#    # Use custom source if "custom" was selected
+#    if source == 'custom' and custom_source:
+#        source = custom_source
+#    
+#    # Here you would typically:
+#    # - Validate the data
+#    # - Save to database
+#    # - Process the registration
+#    # - Send confirmation email, etc.
+#    
+#    # For now, just print to console (for debugging)
+#    print(f"Registration received:")
+#    print(f"  Code: {code}")
+#    print(f"  Source: {source}")
+#    print(f"  Type: {type_value}")
+#    print(f"  Afgiftedatum: {afgiftedatum}")
+#    
+#    # TODO: Add your business logic here
+#    # Example:
+#    # db.save_registration(code, source, type_value, afgiftedatum)
+#    
+#    # Return success page or redirect
+#    return render_template('registration_success.html', 
+#                         code=code, 
+#                         source=source, 
+#                         type_value=type_value, 
+#                         afgiftedatum=afgiftedatum)
+
+
 if __name__ == '__main__':
     app.run(debug=True, port=5005, host="0.0.0.0")

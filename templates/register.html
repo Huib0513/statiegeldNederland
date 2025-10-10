@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registratie</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .form-container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h2 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+            font-weight: bold;
+        }
+        input[type="text"],
+        input[type="date"],
+        select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-size: 14px;
+        }
+        .code-display {
+            background-color: #f0f8ff;
+            padding: 15px;
+            border-radius: 4px;
+            border-left: 4px solid #4CAF50;
+            margin-bottom: 20px;
+        }
+        .code-label {
+            font-weight: bold;
+            color: #555;
+        }
+        .code-value {
+            font-size: 18px;
+            color: #2c3e50;
+            font-family: monospace;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        #customSourceInput {
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        <h2>Registratie Formulier</h2>
+        
+        <div class="code-display">
+            <div class="code-label">Code:</div>
+            <div class="code-value">{{ code }}</div>
+        </div>
+
+        <form method="POST" action="/submit-registration">
+            <input type="hidden" name="code" value="{{ code }}">
+            
+            <div class="form-group">
+                <label for="source">Source:</label>
+                <select id="source" name="source" onchange="toggleCustomSource()" required>
+                    <option value="Polaris" selected>Polaris</option>
+                    <option value="Ausnutria">Ausnutria</option>
+                    <option value="Robert">Robert</option>
+                    <option value="custom">Anders (vrije tekst)</option>
+                </select>
+                <input type="text" id="customSourceInput" name="customSource" 
+                       placeholder="Voer custom source in" style="display: none;">
+            </div>
+
+            <div class="form-group">
+                <label for="type">Type:</label>
+                <select id="type" name="type" required>
+                    <option value="mini">Mini</option>
+                    <option value="small">Small</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="afgiftedatum">Afgiftedatum:</label>
+                <input type="date" id="afgiftedatum" name="afgiftedatum" 
+                       value="{{ today }}" required>
+            </div>
+
+            <button type="submit">Registreren</button>
+        </form>
+    </div>
+
+    <script>
+        function toggleCustomSource() {
+            const sourceSelect = document.getElementById('source');
+            const customInput = document.getElementById('customSourceInput');
+            
+            if (sourceSelect.value === 'custom') {
+                customInput.style.display = 'block';
+                customInput.required = true;
+            } else {
+                customInput.style.display = 'none';
+                customInput.required = false;
+                customInput.value = '';
+            }
+        }
+    </script>
+</body>
+</html>
