@@ -51,13 +51,52 @@
         .code-label {
             font-weight: bold;
             color: #555;
+            margin-bottom: 10px;
         }
         .code-value {
-            font-size: 18px;
+            font-size: 16px;
             color: #2c3e50;
             font-family: monospace;
+            padding: 8px;
+            background-color: white;
+            border-radius: 4px;
+            margin-bottom: 8px;
         }
-        button {
+        .code-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        .code-item input {
+            flex: 1;
+            margin-right: 10px;
+        }
+        .remove-btn {
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .remove-btn:hover {
+            background-color: #c82333;
+        }
+        .add-btn {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+        .add-btn:hover {
+            background-color: #218838;
+        }
+        button[type="submit"] {
             background-color: #4CAF50;
             color: white;
             padding: 12px 30px;
@@ -67,11 +106,22 @@
             font-size: 16px;
             width: 100%;
         }
-        button:hover {
+        button[type="submit"]:hover {
             background-color: #45a049;
         }
         #customSourceInput {
             margin-top: 10px;
+        }
+        .flash-messages {
+            margin-bottom: 20px;
+        }
+        .flash-message {
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
         }
     </style>
 </head>
@@ -79,14 +129,32 @@
     <div class="form-container">
         <h2>Registratie Formulier</h2>
         
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <div class="flash-messages">
+                    {% for message in messages %}
+                        <div class="flash-message">{{ message }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+        
         <div class="code-display">
-            <div class="code-label">Code:</div>
-            <div class="code-value">{{ code }}</div>
+            <div class="code-label">Zaknummer(s):</div>
+            <div id="codesContainer">
+                {% for code in codes %}
+                <div class="code-item">
+                    <input type="text" name="codes[]" value="{{ code }}" placeholder="Voer zaknummer in" required>
+                    {% if loop.index > 1 %}
+                    <button type="button" class="remove-btn" onclick="removeCode(this)">×</button>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+            <button type="button" class="add-btn" onclick="addCode()">+ Voeg nog een zak toe</button>
         </div>
 
-        <form method="POST" action="/submit-registration">
-            <input type="hidden" name="code" value="{{ code }}">
-            
+        <form method="POST" action="/submit-registration" id="registrationForm">
             <div class="form-group">
                 <label for="source">Source:</label>
                 <select id="source" name="source" onchange="toggleCustomSource()" required>
@@ -131,6 +199,38 @@
                 customInput.value = '';
             }
         }
+
+        function addCode() {
+            const container = document.getElementById('codesContainer');
+            
+            // Get the value from the last input field
+            const allInputs = container.querySelectorAll('input[name="codes[]"]');
+            const lastInput = allInputs[allInputs.length - 1];
+            const previousValue = lastInput ? lastInput.value : '';
+            
+            const newCodeItem = document.createElement('div');
+            newCodeItem.className = 'code-item';
+            newCodeItem.innerHTML = `
+                <input type="text" name="codes[]" value="${previousValue}" placeholder="Voer zaknummer in" required>
+                <button type="button" class="remove-btn" onclick="removeCode(this)">×</button>
+            `;
+            container.appendChild(newCodeItem);
+            
+            // Focus on the new input field and select all text for easy editing
+            const newInput = newCodeItem.querySelector('input');
+            newInput.focus();
+            newInput.select();
+        }
+
+        function removeCode(button) {
+            button.parentElement.remove();
+        }
+
+        // Intercept form submission to move codes from display area to form
+        document.getElementById('registrationForm').addEventListener('submit', function(e) {
+            // Codes are already part of the form submission via name="codes[]"
+            // No additional action needed
+        });
     </script>
 </body>
 </html>

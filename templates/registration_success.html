@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Registratie Geslaagd</title>
+    <title>Registratie {{ 'Geslaagd' if all_success else 'Resultaat' }}</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            max-width: 600px;
+            max-width: 700px;
             margin: 50px auto;
             padding: 20px;
             background-color: #f5f5f5;
@@ -17,16 +17,66 @@
             padding: 30px;
             border-radius: 8px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            text-align: center;
         }
         .success-icon {
             font-size: 60px;
-            color: #4CAF50;
+            text-align: center;
             margin-bottom: 20px;
         }
-        h2 {
+        .success-icon.success {
             color: #4CAF50;
+        }
+        .success-icon.partial {
+            color: #ff9800;
+        }
+        .success-icon.error {
+            color: #dc3545;
+        }
+        h2 {
+            text-align: center;
             margin-bottom: 20px;
+        }
+        h2.success {
+            color: #4CAF50;
+        }
+        h2.partial {
+            color: #ff9800;
+        }
+        h2.error {
+            color: #dc3545;
+        }
+        .summary {
+            text-align: center;
+            background-color: #f9f9f9;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 20px 0;
+        }
+        .results-list {
+            margin: 20px 0;
+        }
+        .result-item {
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+            border-left: 4px solid;
+        }
+        .result-item.success {
+            background-color: #d4edda;
+            border-color: #28a745;
+        }
+        .result-item.error {
+            background-color: #f8d7da;
+            border-color: #dc3545;
+        }
+        .result-code {
+            font-weight: bold;
+            font-family: monospace;
+            font-size: 16px;
+        }
+        .result-message {
+            margin-top: 5px;
+            color: #555;
         }
         .details {
             text-align: left;
@@ -45,28 +95,69 @@
         .detail-value {
             color: #2c3e50;
         }
-        a {
-            display: inline-block;
+        .button-group {
+            display: flex;
+            gap: 10px;
             margin-top: 20px;
-            color: #4CAF50;
-            text-decoration: none;
         }
-        a:hover {
-            text-decoration: underline;
+        a {
+            flex: 1;
+            display: block;
+            text-align: center;
+            padding: 12px;
+            border-radius: 4px;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        a.primary {
+            background-color: #4CAF50;
+            color: white;
+        }
+        a.primary:hover {
+            background-color: #45a049;
+        }
+        a.secondary {
+            background-color: #6c757d;
+            color: white;
+        }
+        a.secondary:hover {
+            background-color: #5a6268;
         }
     </style>
 </head>
 <body>
     <div class="success-container">
-        <div class="success-icon">✓</div>
-        <h2>Registratie Geslaagd!</h2>
-        <p>Uw registratie is succesvol verwerkt.</p>
+        {% if all_success %}
+            <div class="success-icon success">✓</div>
+            <h2 class="success">Registratie Geslaagd!</h2>
+            <p style="text-align: center;">Alle zakken zijn succesvol geregistreerd.</p>
+        {% else %}
+            {% set success_count = results | selectattr('success') | list | length %}
+            {% if success_count > 0 %}
+                <div class="success-icon partial">⚠</div>
+                <h2 class="partial">Gedeeltelijk Geslaagd</h2>
+                <p style="text-align: center;">{{ success_count }} van de {{ results|length }} zakken succesvol geregistreerd.</p>
+            {% else %}
+                <div class="success-icon error">✗</div>
+                <h2 class="error">Registratie Mislukt</h2>
+                <p style="text-align: center;">Geen zakken konden worden geregistreerd.</p>
+            {% endif %}
+        {% endif %}
+        
+        <div class="results-list">
+            <h3>Resultaten per zak:</h3>
+            {% for result in results %}
+                <div class="result-item {{ 'success' if result.success else 'error' }}">
+                    <div class="result-code">
+                        {{ '✓' if result.success else '✗' }} {{ result.code }}
+                    </div>
+                    <div class="result-message">{{ result.message }}</div>
+                </div>
+            {% endfor %}
+        </div>
         
         <div class="details">
-            <div class="detail-row">
-                <span class="detail-label">Code:</span>
-                <span class="detail-value">{{ code }}</span>
-            </div>
+            <h3>Registratie gegevens:</h3>
             <div class="detail-row">
                 <span class="detail-label">Source:</span>
                 <span class="detail-value">{{ source }}</span>
@@ -81,7 +172,10 @@
             </div>
         </div>
         
-        <a href="/">← Terug naar home</a>
+        <div class="button-group">
+            <a href="/register" class="primary">Registreer nog een zak</a>
+            <a href="/" class="secondary">Terug naar home</a>
+        </div>
     </div>
 </body>
 </html>
