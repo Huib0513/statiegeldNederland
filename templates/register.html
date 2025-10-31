@@ -139,22 +139,22 @@
             {% endif %}
         {% endwith %}
         
-        <div class="code-display">
-            <div class="code-label">Zaknummer(s):</div>
-            <div id="codesContainer">
-                {% for code in codes %}
-                <div class="code-item">
-                    <input type="text" name="codes[]" value="{{ code }}" placeholder="Voer zaknummer in" required>
-                    {% if loop.index > 1 %}
-                    <button type="button" class="remove-btn" onclick="removeCode(this)">×</button>
-                    {% endif %}
+        <form method="POST" action="/submit-registration" id="registrationForm" onsubmit="return validateForm()">
+            <div class="code-display">
+                <div class="code-label">Zaknummer(s):</div>
+                <div id="codesContainer">
+                    {% for code in codes %}
+                    <div class="code-item">
+                        <input type="text" name="codes[]" value="{{ code }}" placeholder="Voer zaknummer in" required>
+                        {% if loop.index > 1 %}
+                        <button type="button" class="remove-btn" onclick="removeCode(this)">×</button>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
                 </div>
-                {% endfor %}
+                <button type="button" class="add-btn" onclick="addCode()">+ Voeg nog een zak toe</button>
             </div>
-            <button type="button" class="add-btn" onclick="addCode()">+ Voeg nog een zak toe</button>
-        </div>
 
-        <form method="POST" action="/submit-registration" id="registrationForm">
             <div class="form-group">
                 <label for="source">Source:</label>
                 <select id="source" name="source" onchange="toggleCustomSource()" required>
@@ -170,8 +170,8 @@
             <div class="form-group">
                 <label for="type">Type:</label>
                 <select id="type" name="type" required>
-                    <option value="mini">Mini</option>
-                    <option value="small">Small</option>
+                    <option value="Mini">Mini</option>
+                    <option value="Small">Small</option>
                 </select>
             </div>
 
@@ -226,11 +226,25 @@
             button.parentElement.remove();
         }
 
-        // Intercept form submission to move codes from display area to form
-        document.getElementById('registrationForm').addEventListener('submit', function(e) {
-            // Codes are already part of the form submission via name="codes[]"
-            // No additional action needed
-        });
+        function validateForm() {
+            // Get all code inputs
+            const inputs = document.querySelectorAll('input[name="codes[]"]');
+            let hasValidCode = false;
+            
+            // Check if at least one input has a value
+            inputs.forEach(input => {
+                if (input.value.trim() !== '') {
+                    hasValidCode = true;
+                }
+            });
+            
+            if (!hasValidCode) {
+                alert('Voer ten minste één zaknummer in');
+                return false;
+            }
+            
+            return true;
+        }
     </script>
 </body>
 </html>

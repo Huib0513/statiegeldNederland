@@ -110,6 +110,12 @@ def register():
 @app.route('/submit-registration', methods=['POST'])
 def submit_registration():
     """Process bag registration form submission."""
+    # Debug: Print all form data
+    #print("DEBUG: Form data received:")
+    #print(f"  All form keys: {list(request.form.keys())}")
+    #print(f"  codes[]: {request.form.getlist('codes[]')}")
+    #print(f"  code: {request.form.get('code')}")
+    
     # Get common form data
     source = request.form.get('source')
     custom_source = request.form.get('customSource')
@@ -121,13 +127,19 @@ def submit_registration():
         source = custom_source
     
     # Get all bag codes (support multiple bags)
+    # Try different form field names
     codes = request.form.getlist('codes[]')
     
     # Fallback to single code if codes[] not present
-    if not codes:
+    if not codes or (len(codes) == 1 and not codes[0].strip()):
         single_code = request.form.get('code')
         if single_code:
             codes = [single_code]
+    
+    # Filter out empty codes
+    codes = [code.replace("1991571", "").strip() for code in codes if code and code.strip()]
+    
+    #print(f"DEBUG: Processed codes: {codes}")
     
     if not codes:
         flash('No bag codes provided')

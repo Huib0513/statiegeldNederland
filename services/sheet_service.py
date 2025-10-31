@@ -193,8 +193,10 @@ class SheetService:
         try:
             columns = self.sheets_manager.get_column_names(spreadsheet_id, sheet_name)
             zaknummer_col_index = ord(columns['Zaknummer']) - ord('A')
+            afgiftedatum_col_index = ord(columns['Afgiftedatum']) - ord('A')
             
             # Check if bag already exists
+            # TODO: fix search, it does not work
             existing_row = self.sheets_manager.find_row_by_value(
                 spreadsheet_id, sheet_name, bag_id, zaknummer_col_index
             )
@@ -206,8 +208,11 @@ class SheetService:
                 }
             
             # Find insert position
+            #position = self._find_insert_position(
+            #    spreadsheet_id, sheet_name, bag_id, zaknummer_col_index
+            #)
             position = self._find_insert_position(
-                spreadsheet_id, sheet_name, bag_id, zaknummer_col_index
+                spreadsheet_id, sheet_name, date, afgiftedatum_col_index
             )
             
             # Insert new row with registration data

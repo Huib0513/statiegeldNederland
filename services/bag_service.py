@@ -85,7 +85,7 @@ class BagService:
         if not source or not source.strip():
             errors['source'] = "Source is required"
         
-        if bag_type not in ['mini', 'small']:
+        if bag_type not in ['Mini', 'Small']:
             errors['bag_type'] = "Invalid bag type"
         
         if not date:
